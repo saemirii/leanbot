@@ -16,6 +16,10 @@ enum TimeSettingMode {
 
 TimeSettingMode currentMode = HOUR_MODE;  // Start with setting hour
 
+// Debounce settings
+unsigned long lastDebounceTime = 0;  // Last time a sensor was triggered
+unsigned long debounceDelay = 200;   // Debounce interval (milliseconds)
+
 void setup() {
   // Start Leanbot
   Leanbot.begin();
@@ -50,7 +54,7 @@ void loop() {
         u8g2.print("Second");
         break;
       case DATE_MODE:
-        u8g2.print("Date");
+        u8g2.print("Day");
         break;
       case MONTH_MODE:
         u8g2.print("Month");
@@ -77,21 +81,27 @@ void loop() {
     
   } while (u8g2.nextPage());
 
-  // Sensor Inputs for Adjusting Time/Date
-  if (LbTouch.read(TB1A) == HIGH) {  // Increment hour/minute/second/date
+  unsigned long currentMillis = millis();
+
+  // Sensor Inputs for Adjusting Time/Date with debounce logic
+  if ((LbTouch.read(TB1A) == HIGH) && (currentMillis - lastDebounceTime > debounceDelay)) {  // Increment hour/minute/second/date
     adjustTime(true);
+    lastDebounceTime = currentMillis;  // Update last debounce time
   }
-  if (LbTouch.read(TB1B) == HIGH) {  // Decrement hour/minute/second/date
+  if ((LbTouch.read(TB1B) == HIGH) && (currentMillis - lastDebounceTime > debounceDelay)) {  // Decrement hour/minute/second/date
     adjustTime(false);
+    lastDebounceTime = currentMillis;  // Update last debounce time
   }
-  if (LbTouch.read(TB2A) == HIGH) {  // Switch to next setting (hour -> minute -> second -> date -> month -> year)
+  if ((LbTouch.read(TB2A) == HIGH) && (currentMillis - lastDebounceTime > debounceDelay)) {  // Switch to next setting
     switchSetting();
+    lastDebounceTime = currentMillis;  // Update last debounce time
   }
-  if (LbTouch.read(TB2B) == HIGH) {  // Switch to previous setting
+  if ((LbTouch.read(TB2B) == HIGH) && (currentMillis - lastDebounceTime > debounceDelay)) {  // Switch to previous setting
     previousSetting();
+    lastDebounceTime = currentMillis;  // Update last debounce time
   }
   
-  LbDelay(200);  // Debounce delay for sensor presses
+  LbDelay(200);  // Additional debounce delay for sensor presses (optional)
 }
 
 void adjustTime(bool increment) {
