@@ -33,7 +33,34 @@ void loop() {
   u8g2.firstPage();
   
   do {
-    // Display the current time and date on the OLED
+    // Display the current setting and value on the OLED
+    u8g2.setFont(u8g2_font_5x8_tr);
+    u8g2.setCursor(0, 10);
+    u8g2.print("Setting: ");
+    
+    // Display current setting name
+    switch (currentMode) {
+      case HOUR_MODE:
+        u8g2.print("Hour");
+        break;
+      case MINUTE_MODE:
+        u8g2.print("Minute");
+        break;
+      case SECOND_MODE:
+        u8g2.print("Second");
+        break;
+      case DATE_MODE:
+        u8g2.print("Date");
+        break;
+      case MONTH_MODE:
+        u8g2.print("Month");
+        break;
+      case YEAR_MODE:
+        u8g2.print("Year");
+        break;
+    }
+
+    // Display the current time and date
     u8g2.setFont(u8g2_font_profont29_tf);        
     u8g2.setCursor(0, 60);  
     u8g2.print(hour());
