@@ -18,7 +18,11 @@ TimeSettingMode currentMode = HOUR_MODE;  // Start with setting hour
 
 // Debounce settings
 unsigned long lastDebounceTime = 0;  // Last time a sensor was triggered
-unsigned long debounceDelay = 200;   // Debounce interval (milliseconds)
+unsigned long debounceDelay = 100;   // Debounce interval (milliseconds), decreased for quicker responsiveness
+
+// Loading screen settings
+bool loadingScreen = true;
+bool displayTimeOnly = false;  // Flag to control whether to display time only
 
 void setup() {
   // Start Leanbot
@@ -30,38 +34,53 @@ void setup() {
   
   // Set initial time (hours, minutes, seconds, day, month, year)
   setTime(15, 11, 24, 27, 9, 2023);
+
+  // Display loading screen for a brief period
+  showLoadingScreen();
 }
 
 void loop() {
+  if (loadingScreen) {
+    showLoadingScreen(); // Keep showing loading screen during startup
+    return;
+  }
+
   u8g2.setFont(u8g2_font_profont29_tf);
   u8g2.firstPage();
   
   do {
-    // Display the current setting and value on the OLED
-    u8g2.setFont(u8g2_font_5x8_tr);
-    u8g2.setCursor(0, 10);
-    u8g2.print("Setting: ");
-    
-    // Display current setting name
-    switch (currentMode) {
-      case HOUR_MODE:
-        u8g2.print("Hour");
-        break;
-      case MINUTE_MODE:
-        u8g2.print("Minute");
-        break;
-      case SECOND_MODE:
-        u8g2.print("Second");
-        break;
-      case DATE_MODE:
-        u8g2.print("Day");
-        break;
-      case MONTH_MODE:
-        u8g2.print("Month");
-        break;
-      case YEAR_MODE:
-        u8g2.print("Year");
-        break;
+    if (!displayTimeOnly) {
+      // Display greeting based on time of day
+      u8g2.setFont(u8g2_font_5x8_tr);
+      u8g2.setCursor(0, 10);
+      u8g2.print(getGreeting());
+      
+      // Display the current setting and value on the OLED
+      u8g2.setFont(u8g2_font_5x8_tr);
+      u8g2.setCursor(0, 30);
+      u8g2.print("Setting: ");
+      
+      // Display current setting name
+      switch (currentMode) {
+        case HOUR_MODE:
+          u8g2.print("Hour");
+          break;
+        case MINUTE_MODE:
+          u8g2.print("Minute");
+          break;
+        case SECOND_MODE:
+          u8g2.print("Second");
+          break;
+        case DATE_MODE:
+          u8g2.print("Day");
+          break;
+        case MONTH_MODE:
+          u8g2.print("Month");
+          break;
+        case YEAR_MODE:
+          u8g2.print("Year");
+          break;
+      }
     }
 
     // Display the current time and date
@@ -88,20 +107,43 @@ void loop() {
     adjustTime(true);
     lastDebounceTime = currentMillis;  // Update last debounce time
   }
-  if ((LbTouch.read(TB1B) == HIGH) && (currentMillis - lastDebounceTime > debounceDelay)) {  // Decrement hour/minute/second/date
+  if ((LbTouch.read(TB2A) == HIGH) && (currentMillis - lastDebounceTime > debounceDelay)) {  // Decrement hour/minute/second/date
     adjustTime(false);
     lastDebounceTime = currentMillis;  // Update last debounce time
   }
-  if ((LbTouch.read(TB2A) == HIGH) && (currentMillis - lastDebounceTime > debounceDelay)) {  // Switch to next setting
+  if ((LbTouch.read(TB1B) == HIGH) && (currentMillis - lastDebounceTime > debounceDelay)) {  // Switch to next setting
     switchSetting();
     lastDebounceTime = currentMillis;  // Update last debounce time
   }
-  if ((LbTouch.read(TB2B) == HIGH) && (currentMillis - lastDebounceTime > debounceDelay)) {  // Switch to previous setting
-    previousSetting();
+  if ((LbTouch.read(TB2B) == HIGH) && (currentMillis - lastDebounceTime > debounceDelay)) {  // Toggle display (show time without setting text)
+    displayTimeOnly = !displayTimeOnly;  // Toggle the flag
     lastDebounceTime = currentMillis;  // Update last debounce time
   }
   
   LbDelay(200);  // Additional debounce delay for sensor presses (optional)
+}
+
+void showLoadingScreen() {
+  u8g2.setFont(u8g2_font_5x8_tr);
+  u8g2.firstPage();
+  do {
+    u8g2.setCursor(0, 30);
+    u8g2.print("Loading...");
+  } while (u8g2.nextPage());
+  
+  delay(2000); // Wait for 2 seconds before transitioning to the main UI
+  loadingScreen = false;
+}
+
+String getGreeting() {
+  int currentHour = hour();
+  if (currentHour < 12) {
+    return "Good Morning!";
+  } else if (currentHour < 18) {
+    return "Good Afternoon!";
+  } else {
+    return "Good Evening!";
+  }
 }
 
 void adjustTime(bool increment) {
@@ -133,15 +175,6 @@ void switchSetting() {
     currentMode = HOUR_MODE;
   } else {
     currentMode = static_cast<TimeSettingMode>(currentMode + 1);
-  }
-}
-
-void previousSetting() {
-  // Move to the previous setting (cycle in reverse order)
-  if (currentMode == HOUR_MODE) {
-    currentMode = YEAR_MODE;
-  } else {
-    currentMode = static_cast<TimeSettingMode>(currentMode - 1);
   }
 }
 
