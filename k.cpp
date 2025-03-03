@@ -57,10 +57,11 @@ void loop() {
       
       // Display the current setting and value on the OLED
       u8g2.setFont(u8g2_font_5x8_tr);
-      u8g2.setCursor(0, 30);
+      u8g2.setCursor(0, 20);  // Adjusted vertical position to avoid overlap
       u8g2.print("Setting: ");
       
       // Display current setting name
+      u8g2.setCursor(60, 20);  // Shifted the setting name to the right for better spacing
       switch (currentMode) {
         case HOUR_MODE:
           u8g2.print("Hour");
@@ -83,15 +84,16 @@ void loop() {
       }
     }
 
-    // Display the current time and date
+    // Display the current time
     u8g2.setFont(u8g2_font_profont29_tf);        
-    u8g2.setCursor(0, 60);  
+    u8g2.setCursor(0, 45);  // Adjusted vertical position for time display
     u8g2.print(hour());
     printDigits(minute());
     printDigits(second());
 
+    // Display the current date
     u8g2.setFont(u8g2_font_profont22_tf);
-    u8g2.setCursor(10, 25);
+    u8g2.setCursor(10, 60);  // Adjusted vertical position for date
     u8g2.print(day());
     u8g2.print("|");
     u8g2.print(month());
@@ -116,7 +118,7 @@ void loop() {
     lastDebounceTime = currentMillis;  // Update last debounce time
   }
   if ((LbTouch.read(TB2B) == HIGH) && (currentMillis - lastDebounceTime > debounceDelay)) {  // Toggle display (show time without setting text)
-    displayTimeOnly = !displayTimeOnly;  // Toggle the flag
+    displayTimeOnly = !displayTimeOnly;  // Toggle the flag to show/hide setting text
     lastDebounceTime = currentMillis;  // Update last debounce time
   }
   
