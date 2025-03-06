@@ -141,11 +141,22 @@ void showLoadingScreen() {
 
 String getGreeting() {
   int currentHour = hour();
-  if (currentHour < 12) {
+  
+  // Ensure the RGB LED is cleared and set its brightness
+  LbRGB.clear();
+  LbRGB.setBrightness(240);
+
+  if (currentHour < 12) { // Morning
+    LbRGB[ledA] = 0xFFFF00;  // Yellow
+    LbRGB.show();
     return "Good Morning!";
-  } else if (currentHour < 18) {
+  } else if (currentHour < 18) { // Afternoon
+    LbRGB[ledA] = 0xFFA500;  // Orange
+    LbRGB.show();
     return "Good Afternoon!";
-  } else {
+  } else { // Night
+    LbRGB[ledA] = 0x0000FF;  // Blue
+    LbRGB.show();
     return "Good Evening!";
   }
 }
