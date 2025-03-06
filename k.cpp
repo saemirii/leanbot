@@ -49,12 +49,13 @@ void loop() {
   u8g2.firstPage();
   
   do {
+    // Display greeting based on time of day (this will always be shown)
+    u8g2.setFont(u8g2_font_5x8_tr);
+    u8g2.setCursor(0, 10);
+    u8g2.print(getGreeting());
+
+    // Only display the current setting when 'displayTimeOnly' is false
     if (!displayTimeOnly) {
-      // Display greeting based on time of day
-      u8g2.setFont(u8g2_font_5x8_tr);
-      u8g2.setCursor(0, 10);
-      u8g2.print(getGreeting());
-      
       // Display the current setting and value on the OLED
       u8g2.setFont(u8g2_font_5x8_tr);
       u8g2.setCursor(0, 20);  // Adjusted vertical position to avoid overlap
@@ -124,6 +125,7 @@ void loop() {
   
   LbDelay(200);  // Additional debounce delay for sensor presses (optional)
 }
+
 
 void showLoadingScreen() {
   u8g2.setFont(u8g2_font_5x8_tr);
