@@ -85,12 +85,18 @@ void loop() {
       }
     }
 
-    // Display the current time
-    u8g2.setFont(u8g2_font_profont29_tf);        
-    u8g2.setCursor(0, 45);  // Adjusted vertical position for time display
-    u8g2.print(hour());
-    printDigits(minute());
-    printDigits(second());
+    // Center the time text and move it slightly up
+    u8g2.setFont(u8g2_font_profont22_tf);        
+    String timeString = String(hour()) + ":" + String(minute()) + ":" + String(second());
+    int textWidth = u8g2.getStrWidth(timeString.c_str());  // Get the width of the time text
+    int centerX = (128 - textWidth) / 2;  // 128 is the screen width
+    int centerY = 45;  // Default vertical position for time
+    
+    // Adjusting vertical position slightly upwards
+    centerY -= 5;  // Move the text 5 pixels upwards
+
+    u8g2.setCursor(centerX, centerY);  // Set the adjusted position
+    u8g2.print(timeString);
 
     // Display the current date
     u8g2.setFont(u8g2_font_profont22_tf);
