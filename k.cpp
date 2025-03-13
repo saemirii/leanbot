@@ -87,7 +87,9 @@ void loop() {
 
     // Center the time text and move it slightly up
     u8g2.setFont(u8g2_font_profont22_tf);        
-    String timeString = String(hour()) + ":" + String(minute()) + ":" + String(second());
+    String timeString = String(hour() < 10 ? "0" : "") + String(hour()) + ":" +
+                        String(minute() < 10 ? "0" : "") + String(minute()) + ":" +
+                        String(second() < 10 ? "0" : "") + String(second());
     int textWidth = u8g2.getStrWidth(timeString.c_str());  // Get the width of the time text
     int centerX = (128 - textWidth) / 2;  // 128 is the screen width
     int centerY = 45;  // Default vertical position for time
